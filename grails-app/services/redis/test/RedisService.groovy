@@ -1,6 +1,9 @@
 package redis.test
 
+import groovy.sql.Sql
+
 class RedisService {
+  def dataSource
 
     int sumQuota(String userId) {
       /*
@@ -17,6 +20,12 @@ class RedisService {
       upp.addToPromotionPacks(pp3)
       upp.save()
       */
+      Sql sql = Sql.newInstance(dataSource)
+      String result = ''
+      sql.call '{call test.test_sp(?,?,?) }',[userId, 'test', Sql.VARCHAR],{ dwells -> 
+        println dwells
+      }
+      sql.close()
     
       0
     }
