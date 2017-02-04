@@ -12,4 +12,11 @@ class RedisController {
         [status:200, message: "quota is: $quota"]
       }  
     }
+
+    def addQuotaLock(String userId) { 
+      int quota = redisService.sumQuotaLock(userId)
+      render(contentType: "application/json") {
+        [status:200, message: "quota is: $quota"]
+      }  
+    }
 }

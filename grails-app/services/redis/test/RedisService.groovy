@@ -1,6 +1,7 @@
 package redis.test
 
 import groovy.sql.Sql
+import org.springframework.transaction.annotation.Transactional
 
 class RedisService {
   def dataSource
@@ -29,4 +30,25 @@ class RedisService {
     
       0
     }
+
+  int sumQuotaLock(String userId) {
+    UserListingDetail.withTransaction {
+
+      def upp = UserPromotionPack.findByUserId(userId)
+      def uld = UserListingDetail.get(upp.userListingDetail.id)
+      uld.lock()
+      uld.refresh()
+      
+      def pp = upp.promotionPacks.find { pp ->
+        pp.name == 'test'
+      }
+
+      if(pp.listingDetail.availableListings - uld.usedListing > 0) {
+        uld.usedListing++
+        uld.save()
+      }
+
+      uld.usedListing
+    }
+  }
 }

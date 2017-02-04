@@ -7,6 +7,11 @@ class UrlMappings {
       action = [POST:'addQuota']
     }
 
+    "/users/$userId/lock" {
+      controller = "redis"
+      action = [POST:'addQuotaLock']
+    }
+
 		"/"(view:"/index")
 		"500"(view:'/error')
 	}
