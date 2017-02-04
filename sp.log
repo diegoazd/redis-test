@@ -1,0 +1,39 @@
+DELIMITER //
+  CREATE PROCEDURE test_sp
+(IN userId integer(20),
+ IN ppName varchar(20),
+ OUT status_pp varchar(20))
+  BEGIN
+
+  DECLARE ld_id integer(20);
+  DECLARE used_listing_ld integer(20);
+  DECLARE available_listings integer(20);
+
+  select uld.id, uld.used_listing , ld.available_listings
+  into ld_id, used_listing_ld, available_listings
+  from test.promotion_pack pp
+  inner join test.listing_detail ld
+  on pp.listing_detail_id = ld.id
+  inner join test.user_promotion_pack_promotion_pack upppp
+  on upppp.promotion_pack_id = pp.id
+  inner join test.user_promotion_pack upp
+  on upp.id = upppp.user_promotion_pack_promotion_packs_id  
+  inner join test.user_listing_detail uld
+  on uld.id = upp.user_listing_detail_id
+  where name = ppName and upp.user_id = userId
+  and ld.available_listings - uld.used_listing > 0;
+
+
+  IF ld_id is not null THEN 
+  SET status_pp = 'ok'; 
+  START TRANSACTION;
+  SELECT used_listing into used_listing_ld FROM test.user_listing_detail WHERE id = ld_id FOR UPDATE;
+  update test.user_listing_detail 
+  set used_listing = used_listing_ld + 1
+  where id = ld_id;
+  COMMIT;  
+  ELSE SET status_pp = 'fail';
+  END IF;    
+
+  END //
+  DELIMITER ;
